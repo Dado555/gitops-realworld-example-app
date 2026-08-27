@@ -4,4 +4,4 @@ image:
   tag: "fdfce48"
   digest: "sha256:7489f456361a1db36275914131dc65bbbc6112efc8e827bfdfe1dce1eff9fcc0"
 
-replicaCount: 1
+replicaCount: 2

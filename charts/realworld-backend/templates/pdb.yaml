@@ -1,0 +1,12 @@
+{{/* keeps at least 1 backend pod up during voluntary disruptions (node drains, upgrades) */}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      {{- include "realworld-backend.selectorLabels" . | nindent 6 }}

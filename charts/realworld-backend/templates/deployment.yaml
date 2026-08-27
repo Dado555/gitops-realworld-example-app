@@ -1,0 +1,80 @@
+{{/* backend workload - image is digest-pinned (schema enforces the pattern), liveness/readiness split across actuator health groups on the mgmt port (step 1.4), flyway disabled since 7.3's presync hook job owns migrations */}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "realworld-backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "realworld-backend.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "realworld-backend.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: management
+              containerPort: 8081
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: realworld-app
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "postgres"
+            - name: SPRING_FLYWAY_ENABLED
+              value: "false"
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: management
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: management
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: management
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
