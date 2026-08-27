@@ -1,0 +1,22 @@
+{{/* permanent backend egress-allow to RDS - default-deny-egress (Step 5.5) blocks this without it */}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}-egress-rds
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "realworld-backend.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.20.0/24
+        - ipBlock:
+            cidr: 10.0.21.0/24
+      ports:
+        - protocol: TCP
+          port: 5432
