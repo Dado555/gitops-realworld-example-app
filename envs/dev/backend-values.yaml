@@ -1,7 +1,7 @@
-# dev overrides — placeholder image coords, nothing deploys from this file yet
+# dev overrides — real image, pushed manually ahead of ci (step 8.1 will take over updating this)
 image:
-  repository: "123456789012.dkr.ecr.REGION.amazonaws.com/realworld-backend"
-  tag: "dev-0.0.0-placeholder"
-  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-backend"
+  tag: "fdfce48"
+  digest: "sha256:7489f456361a1db36275914131dc65bbbc6112efc8e827bfdfe1dce1eff9fcc0"
 
 replicaCount: 1
