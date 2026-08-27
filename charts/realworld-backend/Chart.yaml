@@ -1,0 +1,6 @@
+apiVersion: v2
+name: realworld-backend
+description: Helm chart for the RealWorld Spring Boot backend API
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

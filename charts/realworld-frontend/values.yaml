@@ -1,0 +1,26 @@
+# Default values for realworld-frontend.
+# This is a skeleton chart (Step 7.1) — no Deployment/Service/probes yet, those
+# land in later steps. These defaults only exist so `helm lint`/`helm template`
+# have something schema-valid to render without any -f override.
+#
+# image.repository / image.tag / image.digest are kept as three separate scalar
+# fields (not one combined string) so a future CI step can update exactly one
+# predictable value per field. values.schema.json requires all three to be
+# non-empty — see that file for why.
+replicaCount: 1
+
+image:
+  repository: "REPLACE_ME/realworld-frontend"
+  tag: "0.0.0-placeholder"
+  digest: "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  # create -- whether a ServiceAccount should be created
+  create: true
+  # name -- name of the ServiceAccount to use; generated from the chart fullname if not set
+  name: ""
+  annotations: {}
+
+nameOverride: ""
+fullnameOverride: ""

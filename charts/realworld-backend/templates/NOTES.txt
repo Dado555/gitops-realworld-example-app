@@ -1,0 +1,9 @@
+{{ .Chart.Name }} ({{ .Chart.Version }}) — chart skeleton only.
+
+Release:   {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Image:     {{ .Values.image.repository }}:{{ .Values.image.tag }}
+
+No Deployment/Service is rendered yet — those arrive in a later step.
+This chart currently only proves out image-field schema validation and
+template rendering mechanics.

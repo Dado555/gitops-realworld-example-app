@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "realworld-frontend values",
+  "description": "Schema guard for realworld-frontend chart values. Primary job: make a blank/missing image.repository, image.tag, or image.digest fail `helm lint`/`helm template` at render time, instead of silently producing a manifest with a broken image reference.",
+  "type": "object",
+  "required": ["image"],
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "image": {
+      "type": "object",
+      "required": ["repository", "tag", "digest"],
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Image repository (registry/repo path), without tag or digest."
+        },
+        "tag": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Image tag. A future CI step overwrites this value on each build."
+        },
+        "digest": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Image digest (sha256:<64 hex chars>) for immutable pinning."
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" },
+        "annotations": { "type": "object" }
+      }
+    },
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" }
+  }
+}
