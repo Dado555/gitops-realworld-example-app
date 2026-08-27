@@ -1,10 +1,4 @@
-# Dev environment overrides for realworld-frontend.
-#
-# These are placeholder/example values — nothing deploys from this file yet
-# (Step 7.1 is local-only). A later CI step replaces image.repository/tag/digest
-# with the real dev ECR coordinates on each build; everything else here is a
-# stand-in so `helm template`/`kubeconform` have a concrete, schema-valid
-# example to render and validate end to end.
+# dev overrides — placeholder image coords, nothing deploys from this file yet
 image:
   repository: "123456789012.dkr.ecr.REGION.amazonaws.com/realworld-frontend"
   tag: "dev-0.0.0-placeholder"

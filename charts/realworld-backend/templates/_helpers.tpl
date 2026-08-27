@@ -1,8 +1,4 @@
-{{/*
-Name helpers for realworld-backend. Standard helm-create-style boilerplate,
-kept here so later steps (7.2 Deployment/Service, 7.4 PDB/ServiceAccount
-wiring) have consistent naming/labels to reuse instead of re-deriving them.
-*/}}
+{{/* name/label helpers, reused by later steps */}}
 
 {{/*
 Expand the name of the chart.
