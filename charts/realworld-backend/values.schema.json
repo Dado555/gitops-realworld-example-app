@@ -25,7 +25,7 @@
         },
         "digest": {
           "type": "string",
-          "minLength": 1,
+          "pattern": "^sha256:[a-f0-9]{64}$",
           "description": "Image digest (sha256:<64 hex chars>) for immutable pinning."
         },
         "pullPolicy": {
