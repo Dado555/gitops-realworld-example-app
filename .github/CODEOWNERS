@@ -1,0 +1,5 @@
+# production config needs a human review before merge - the approval belongs
+# on the merge, not on the argo sync (prod auto-sync stays enabled)
+# solo-owner repo: @Dado555 can't approve their own PR, so branch protection
+# is set with enforce_admins:false - admin merge is the real bypass here
+/envs/prod/** @Dado555
