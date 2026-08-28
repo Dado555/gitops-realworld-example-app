@@ -7,6 +7,11 @@ metadata:
     {{- include "realworld-frontend.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       {{- include "realworld-frontend.selectorLabels" . | nindent 6 }}
@@ -31,6 +36,10 @@ spec:
             capabilities:
               drop:
                 - ALL
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "15"]
           ports:
             - name: http
               containerPort: 8080
