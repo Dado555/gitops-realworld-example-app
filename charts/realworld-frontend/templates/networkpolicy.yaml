@@ -1,0 +1,23 @@
+{{/* permanent frontend ingress-allow from the alb - default-deny-ingress (Step 5.5) blocks this without it; target-type=ip means traffic arrives from the public-subnet cidrs, not a k8s-native source */}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "realworld-frontend.fullname" . }}-ingress-alb
+  labels:
+    {{- include "realworld-frontend.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "realworld-frontend.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 10.0.0.0/24
+        - ipBlock:
+            cidr: 10.0.1.0/24
+      ports:
+        - protocol: TCP
+          port: 8080
