@@ -1,0 +1,55 @@
+{{/* flyway-only migration job - argo presync hook; web server disabled via args, JVM exits 0 once migrations apply */}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}-migrate
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        {{- include "realworld-backend.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "realworld-backend.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999 # image's spring:spring user (named, not numeric, in the image config - kubelet can't verify runAsNonRoot without this)
+        runAsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: {{ .Chart.Name }}-migrate
+          image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["--spring.main.web-application-type=none"]
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          envFrom:
+            - secretRef:
+                name: realworld-app
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "postgres"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
