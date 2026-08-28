@@ -18,6 +18,8 @@ spec:
       serviceAccountName: {{ include "realworld-backend.serviceAccountName" . }}
       securityContext:
         runAsNonRoot: true
+        runAsUser: 999 # image's spring:spring user (named, not numeric, in the image config - kubelet can't verify runAsNonRoot without this)
+        runAsGroup: 999
         seccompProfile:
           type: RuntimeDefault
       containers:
