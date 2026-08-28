@@ -52,10 +52,10 @@ spec:
           resources:
             requests:
               cpu: 50m
-              memory: 32Mi
+              memory: 64Mi # app-dev's LimitRange enforces a 64Mi minimum request
             limits:
               cpu: 200m
-              memory: 64Mi
+              memory: 128Mi
           volumeMounts:
             - name: tmp
               mountPath: /tmp
