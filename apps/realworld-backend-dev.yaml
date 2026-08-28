@@ -26,3 +26,9 @@ spec:
     automated:
       prune: true
       selfHeal: true
+  # step 7.6: hpa owns replicas once live, don't let selfHeal fight it back to the helm-declared value
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
