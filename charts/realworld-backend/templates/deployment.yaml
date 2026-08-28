@@ -14,6 +14,7 @@ spec:
     metadata:
       labels:
         {{- include "realworld-backend.labels" . | nindent 8 }}
+        app.kubernetes.io/component: server
     spec:
       serviceAccountName: {{ include "realworld-backend.serviceAccountName" . }}
       securityContext:

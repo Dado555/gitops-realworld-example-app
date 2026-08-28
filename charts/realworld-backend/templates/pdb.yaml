@@ -10,3 +10,4 @@ spec:
   selector:
     matchLabels:
       {{- include "realworld-backend.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
