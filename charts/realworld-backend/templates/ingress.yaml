@@ -1,0 +1,27 @@
+{{/* alb path rule for /api - shares one alb with the frontend ingress via group.name, lower group.order = evaluated first */}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+  annotations:
+    alb.ingress.kubernetes.io/group.name: realworld-dev
+    alb.ingress.kubernetes.io/group.order: "10"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health/readiness
+    alb.ingress.kubernetes.io/healthcheck-port: "8081"
+    alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=realworld-aws-dev-alb-logs-262786914511,access_logs.s3.prefix=alb
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "realworld-backend.fullname" . }}
+                port:
+                  number: 8080
