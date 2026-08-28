@@ -46,3 +46,26 @@ spec:
           port: 8080
         - protocol: TCP
           port: 8081
+---
+{{/* step 7.7: allow prometheus (phase 9, not deployed yet) to scrape the mgmt port - matches zero pods today, harmless */}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}-ingress-prometheus
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "realworld-backend.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 8081
