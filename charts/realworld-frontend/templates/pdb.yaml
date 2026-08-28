@@ -1,0 +1,13 @@
+{{/* keeps at least 1 frontend pod up during voluntary disruptions (node drains, upgrades) */}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "realworld-frontend.fullname" . }}
+  labels:
+    {{- include "realworld-frontend.labels" . | nindent 4 }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      {{- include "realworld-frontend.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: server

@@ -1,0 +1,17 @@
+{{/* ClusterIP for the frontend workload - static file server, one port only */}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "realworld-frontend.fullname" . }}
+  labels:
+    {{- include "realworld-frontend.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "realworld-frontend.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: server

@@ -1,0 +1,28 @@
+# registers charts/realworld-frontend w/ argo cd - values inlined via valuesObject, duplicates envs/dev/frontend-values.yaml (see step 7.2 report)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: realworld-frontend-dev
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:Dado555/gitops-realworld-example-app.git
+    targetRevision: main
+    path: charts/realworld-frontend
+    helm:
+      valuesObject:
+        image:
+          repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-frontend"
+          tag: "fdca5da"
+          digest: "sha256:05fabd15b41452396a9c8a4adfbaf0cf19d298bb0b637abff47200d6ea89c92a"
+        replicaCount: 2
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: app-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
