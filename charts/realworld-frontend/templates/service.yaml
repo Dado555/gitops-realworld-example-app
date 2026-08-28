@@ -5,7 +5,7 @@ metadata:
   name: {{ include "realworld-frontend.fullname" . }}
   labels:
     {{- include "realworld-frontend.labels" . | nindent 4 }}
-spec:
+specXYZ:
   type: ClusterIP
   ports:
     - port: 8080
