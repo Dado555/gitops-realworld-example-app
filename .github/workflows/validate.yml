@@ -1,0 +1,55 @@
+name: Validate
+
+on:
+  pull_request: {}
+
+permissions:
+  contents: read
+
+# no AWS credentials anywhere in this workflow - manifest validation needs none.
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # envs/prod/* combos land in Step 8.6, once those value files exist
+          - chart: realworld-backend
+            values: envs/dev/backend-values.yaml
+          - chart: realworld-frontend
+            values: envs/dev/frontend-values.yaml
+    steps:
+      - name: checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: setup helm
+        uses: azure/setup-helm@v5.0.1
+        with:
+          version: "v4.2.4"
+
+      - name: helm lint
+        run: helm lint "charts/${{ matrix.chart }}" -f "${{ matrix.values }}"
+
+      - name: helm template
+        run: helm template "charts/${{ matrix.chart }}" -f "${{ matrix.values }}" > rendered.yaml
+
+      # matches the cluster's real Kubernetes version (Step 5.1) - a version
+      # mismatch here gives false failures on recently-changed API fields
+      - name: kubeconform
+        run: |
+          docker run --rm -i ghcr.io/yannh/kubeconform:v0.8.0 \
+            -strict -summary -kubernetes-version 1.36.0 < rendered.yaml
+
+      # LOW findings here are permanent/non-actionable for this chart set
+      # (backend's uid 999 must match the image's real spring:spring user;
+      # frontend's implicit uid 101 comes from the nginx-unprivileged base;
+      # the "default namespace" finding is a helm-template rendering artifact -
+      # Argo sets the real namespace via the Application's destination field) -
+      # gate on MEDIUM+ only, not a blanket ignore-list for things that can't change
+      # ghcr, not docker hub - avoids docker hub's anonymous-pull rate limit,
+      # which github-hosted runners share across a huge pool of unrelated jobs
+      - name: trivy config
+        run: |
+          docker run --rm -v "$PWD:/render" ghcr.io/aquasecurity/trivy:0.74.0 config \
+            --severity MEDIUM,HIGH,CRITICAL --exit-code 1 /render/rendered.yaml
