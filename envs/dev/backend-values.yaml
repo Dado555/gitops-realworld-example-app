@@ -1,7 +1,7 @@
 # dev overrides — real image, pushed manually ahead of ci (step 8.1 will take over updating this)
 image:
   repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-backend"
-  tag: "fdfce48"
-  digest: "sha256:7489f456361a1db36275914131dc65bbbc6112efc8e827bfdfe1dce1eff9fcc0"
+  tag: "5cf48f8"
+  digest: "sha256:deeee2f1092a7c5dff4aa1a4bc7126479823af114280d2ffa6a7609f36b4c8d5"
 
 replicaCount: 2
