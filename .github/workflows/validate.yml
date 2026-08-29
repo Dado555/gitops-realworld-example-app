@@ -14,11 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # envs/prod/* combos land in Step 8.6, once those value files exist
           - chart: realworld-backend
             values: envs/dev/backend-values.yaml
           - chart: realworld-frontend
             values: envs/dev/frontend-values.yaml
+          - chart: realworld-backend
+            values: envs/prod/backend-values.yaml
+          - chart: realworld-frontend
+            values: envs/prod/frontend-values.yaml
     steps:
       - name: checkout
         uses: actions/checkout@v7.0.1

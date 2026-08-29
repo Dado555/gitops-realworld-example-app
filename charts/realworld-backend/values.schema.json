@@ -34,6 +34,13 @@
         }
       }
     },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "groupOrder": { "type": "string", "description": "alb.ingress.kubernetes.io/group.order within the shared IngressGroup." },
+        "listenPort": { "type": ["string", "integer"], "description": "If set, adds a listen-ports annotation for a dedicated ALB listener (e.g. prod's 8080). Empty/unset uses the ALB controller's default (:80)." }
+      }
+    },
     "serviceAccount": {
       "type": "object",
       "properties": {

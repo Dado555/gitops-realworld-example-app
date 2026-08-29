@@ -1,0 +1,39 @@
+# registers charts/realworld-frontend w/ argo cd for prod - values inlined via
+# valuesObject, duplicates envs/prod/frontend-values.yaml (see step 7.2 report on
+# why: argo reads this file, not envs/prod/*, so ci's promotion pr must update both)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: realworld-frontend-prod
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:Dado555/gitops-realworld-example-app.git
+    targetRevision: main
+    path: charts/realworld-frontend
+    helm:
+      valuesObject:
+        image:
+          repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-frontend"
+          tag: "cc1a76f"
+          digest: "sha256:0576e194192bed30d2fbc4ac889dbb9795ccb7ca1cedcc494fd23bb8e0bd79ec"
+        replicaCount: 1
+        ingress:
+          groupOrder: "40"
+          listenPort: 8080
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: app-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  # step 7.6: hpa owns replicas once live, don't let selfHeal fight it back to the helm-declared value
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

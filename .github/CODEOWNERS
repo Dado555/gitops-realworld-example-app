@@ -1,5 +1,10 @@
 # production config needs a human review before merge - the approval belongs
 # on the merge, not on the argo sync (prod auto-sync stays enabled)
-# solo-owner repo: @Dado555 can't approve their own PR, so branch protection
-# is set with enforce_admins:false - admin merge is the real bypass here
+# solo-owner repo: @Dado555 can't approve their own PR, so this requirement is
+# currently inert (see adr 0014, infra repo) - correctly configured and will
+# start working the moment a second collaborator joins
 /envs/prod/** @Dado555
+# the argo application manifests are just as sensitive as their values files -
+# same image tag/digest lives in both (step 8.5's dual-file-sync note)
+/apps/realworld-backend-prod.yaml @Dado555
+/apps/realworld-frontend-prod.yaml @Dado555
