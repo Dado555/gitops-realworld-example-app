@@ -1,10 +1,17 @@
-{{/* permanent backend egress-allow to RDS - default-deny-egress (Step 5.5) blocks this without it */}}
+{{/* permanent backend egress-allow to RDS - default-deny-egress (Step 5.5) blocks this without it.
+     also a preSync hook itself (earlier wave than the migrate job's) - same deadlock as the
+     serviceaccount fix: the migrate job can't reach the database via the ordinary Sync phase's
+     NetworkPolicy, since Sync doesn't run until PreSync (the migrate job) finishes. found live
+     on realworld-backend-prod's first-ever sync, step 8.6. */}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ include "realworld-backend.fullname" . }}-egress-rds
   labels:
     {{- include "realworld-backend.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   podSelector:
     matchLabels:
