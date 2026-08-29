@@ -1,4 +1,4 @@
-# dev overrides — real image, pushed manually ahead of ci (step 8.1 will take over updating this)
+# dev overrides - image tag/digest updated automatically by ci on every push (step 8.5)
 image:
   repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-frontend"
   tag: "cc1a76f"

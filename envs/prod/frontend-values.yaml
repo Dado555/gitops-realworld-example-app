@@ -1,0 +1,12 @@
+# prod overrides - image tag/digest updated by ci's prod-promotion pr (step 8.6),
+# starting from whatever's currently proven working in dev
+image:
+  repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-frontend"
+  tag: "cc1a76f"
+  digest: "sha256:0576e194192bed30d2fbc4ac889dbb9795ccb7ca1cedcc494fd23bb8e0bd79ec"
+
+replicaCount: 1
+
+ingress:
+  groupOrder: "40"
+  listenPort: 8080

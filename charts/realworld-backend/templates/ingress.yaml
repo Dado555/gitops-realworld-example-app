@@ -7,12 +7,15 @@ metadata:
     {{- include "realworld-backend.labels" . | nindent 4 }}
   annotations:
     alb.ingress.kubernetes.io/group.name: realworld-dev
-    alb.ingress.kubernetes.io/group.order: "10"
+    alb.ingress.kubernetes.io/group.order: {{ .Values.ingress.groupOrder | quote }}
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/healthcheck-path: /actuator/health/readiness
     alb.ingress.kubernetes.io/healthcheck-port: "8081"
     alb.ingress.kubernetes.io/load-balancer-attributes: access_logs.s3.enabled=true,access_logs.s3.bucket=realworld-aws-dev-alb-logs-262786914511,access_logs.s3.prefix=alb
+    {{- if .Values.ingress.listenPort }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": {{ .Values.ingress.listenPort }}}]'
+    {{- end }}
 spec:
   ingressClassName: alb
   rules:
