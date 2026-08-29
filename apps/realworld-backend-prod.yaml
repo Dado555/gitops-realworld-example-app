@@ -18,8 +18,8 @@ spec:
       valuesObject:
         image:
           repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-backend"
-          tag: "f865c00"
-          digest: "sha256:f61aea7732a72f2688504f7ac83a7f71d6e7bb6187baaf2b094c6059e40db3e5"
+          tag: "60b78b6"
+          digest: "sha256:9b3e9b91d9f9ec80de22b9a028dad6ba4551954cba581f7913ee9894002e09b9"
         replicaCount: 1
         ingress:
           groupOrder: "30"
