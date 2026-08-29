@@ -2,8 +2,8 @@
 # starting from whatever's currently proven working in dev
 image:
   repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-frontend"
-  tag: "cc1a76f"
-  digest: "sha256:0576e194192bed30d2fbc4ac889dbb9795ccb7ca1cedcc494fd23bb8e0bd79ec"
+  tag: "ec5e2ca"
+  digest: "sha256:3977d0f2e90da800757073bd236ea0410ec8490aaad54ccf6b153c7f9ab7e56f"
 
 replicaCount: 1
 
