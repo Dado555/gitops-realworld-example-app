@@ -16,8 +16,8 @@ spec:
       valuesObject:
         image:
           repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-backend"
-          tag: "867feaf"
-          digest: "sha256:49d5872e20fc171521bc03c2ee3b3680b6c5774a06cb371d2db811d90feda44a"
+          tag: "779708c"
+          digest: "sha256:66ed376636e9e0cbc2fb646692318a2b4b8c2a19a381820ea0fa8825fc37e9aa"
         replicaCount: 2
   destination:
     server: https://kubernetes.default.svc
