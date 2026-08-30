@@ -59,10 +59,20 @@ spec:
               value: "false"
             {{- if .Values.drillBadDbUrl }}
             # step 9.7 alert-drill only: shadows DB_URL from the envFrom secret above (explicit
-            # env: entries take precedence over envFrom for the same name) to force HikariCP's
-            # fail-fast pool init to crash the JVM on startup, without touching the real secret.
+            # env: entries take precedence over envFrom for the same name). found live this does
+            # NOT crash the jvm - hikaricp's pool init here is lazy, so context refresh succeeds
+            # and the pod sits Running/NotReady forever (readiness probe fails, liveness doesn't
+            # check the datasource). real gap: no alert covers "replica stuck NotReady" today.
             - name: DB_URL
               value: "jdbc:postgresql://drill-nonexistent-host:5432/realworld"
+            {{- end }}
+            {{- if .Values.drillPrivilegedPort }}
+            # step 9.7 alert-drill only: binds embedded tomcat to port 80. runAsUser 999 (non-root,
+            # see securityContext above) can't bind <1024, so this throws BindException during
+            # context refresh and exits the jvm immediately - a genuine, fast CrashLoopBackOff,
+            # unlike drillBadDbUrl above.
+            - name: SERVER_PORT
+              value: "80"
             {{- end }}
           startupProbe:
             httpGet:
