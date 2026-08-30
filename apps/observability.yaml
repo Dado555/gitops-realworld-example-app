@@ -1,0 +1,28 @@
+# registers charts/observability (a thin wrapper around the upstream kube-prometheus-stack
+# chart, vendored via Chart.lock/charts/*.tgz - see charts/observability/Chart.yaml) w/ argo cd.
+# unlike the backend/frontend apps, values live in charts/observability/values.yaml rather than
+# being inlined here - kube-prometheus-stack's value surface is far larger than a single app's.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: observability
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: git@github.com:Dado555/gitops-realworld-example-app.git
+    targetRevision: main
+    path: charts/observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      # kube-prometheus-stack ships CRDs (via its crds subchart) that exceed the
+      # last-applied-configuration annotation's size limit under a plain apply
+      - ServerSideApply=true

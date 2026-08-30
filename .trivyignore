@@ -1,0 +1,43 @@
+# step 9.3: kube-prometheus-stack findings, all permanent/non-actionable via values -
+# each is how the chart's constituent tools are fundamentally designed to work, not a
+# misconfiguration. unlike step 8.4's backend/frontend LOW findings (handled via a plain
+# severity filter, since those really can never change), these are CRITICAL/HIGH and worth
+# tracking explicitly as accepted risk, matching the infra repo's step 8.3 .trivyignore
+# convention (id + reason + review date) rather than silently widening the severity filter.
+
+# prometheus-operator's own RBAC: it watches/manages Prometheus, Alertmanager, ServiceMonitor,
+# etc. cluster-wide by design - narrowing this breaks service discovery across namespaces.
+AVD-KSV-0041 exp:2027-08-31
+AVD-KSV-0045 exp:2027-08-31
+AVD-KSV-0048 exp:2027-08-31
+AVD-KSV-0049 exp:2027-08-31
+AVD-KSV-0056 exp:2027-08-31
+AVD-KSV-0113 exp:2027-08-31
+AVD-KSV-0114 exp:2027-08-31
+
+# node-exporter is a host metrics collector - hostNetwork/hostPID/hostPath(/,/proc,/sys) and
+# the resulting missing seccomp profile are the mechanism, not a bug.
+AVD-KSV-0009 exp:2027-08-31
+AVD-KSV-0010 exp:2027-08-31
+AVD-KSV-0023 exp:2027-08-31
+AVD-KSV-0121 exp:2027-08-31
+AVD-KSV-0104 exp:2027-08-31
+
+# init containers (grafana's chown-data, prometheus-operator's admission cert generator) need
+# brief root/writable access to do their one job before the real container starts.
+AVD-KSV-0001 exp:2027-08-31
+AVD-KSV-0014 exp:2027-08-31
+AVD-KSV-0022 exp:2027-08-31
+
+# prometheus/alertmanager CRs need their operator-issued service account token to authenticate
+# to the k8s API for service discovery - automountServiceAccountToken:false would break that.
+AVD-KSV-0036 exp:2027-08-31
+
+# kube-system-namespaced Services are intentional: the chart creates them to let prometheus
+# scrape control-plane components (scheduler/controller-manager/etcd/kube-proxy/coredns) that
+# aren't otherwise exposed via a normal Service - not a placement mistake.
+AVD-KSV-0037 exp:2027-08-31
+
+# every image here (quay.io, registry.k8s.io, ghcr.io) is the chart's own upstream default for
+# an established, widely-deployed CNCF-ecosystem project - not an untrusted third party.
+AVD-KSV-0125 exp:2027-08-31

@@ -1,0 +1,17 @@
+# step 9.3: eks's ebs csi driver tags volumes per-storageclass via tagSpecification_N
+# (verified against the driver's own tagging.md - no per-pvc annotation exists), so a
+# dedicated class is the only way to tag just prometheus/grafana's volumes Backup=true
+# without tagging every gp3 volume in the cluster. otherwise identical to the cluster's
+# default gp3 class.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3-backup
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+parameters:
+  type: gp3
+  encrypted: "true"
+  tagSpecification_1: "Backup=true"

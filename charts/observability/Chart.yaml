@@ -1,0 +1,9 @@
+apiVersion: v2
+name: observability
+description: Wrapper around kube-prometheus-stack, plus a backup-tagged gp3 StorageClass for its PVCs
+type: application
+version: 0.1.0
+dependencies:
+  - name: kube-prometheus-stack
+    version: 88.6.1
+    repository: https://prometheus-community.github.io/helm-charts
