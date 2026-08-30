@@ -52,9 +52,17 @@ spec:
         # alert 3: pod crash-looping. reads the container's own waiting-reason directly
         # (kube-state-metrics) rather than inferring from restart-count velocity - a direct
         # signal, not a heuristic.
+        #
+        # wrapped in max_over_time(...[2m]): found live during a real drill that the bare gauge
+        # has genuine ~45s gaps mid-crash-loop - the container briefly leaves the Waiting state
+        # on each restart attempt before crashing again, so kube-state-metrics stops emitting
+        # this series for a few seconds each cycle. that's enough to reset the for: timer to
+        # zero every time, so the alert never accumulated 5 continuous minutes and never fired
+        # despite a pod crash-looping for 20+ minutes straight. max_over_time makes the signal
+        # sticky across each brief gap; 2m gives comfortable margin over the observed ~45s.
         - alert: PodCrashLooping
           expr: |
-            kube_pod_container_status_waiting_reason{namespace=~"app-dev|app-prod", reason="CrashLoopBackOff"} == 1
+            max_over_time(kube_pod_container_status_waiting_reason{namespace=~"app-dev|app-prod", reason="CrashLoopBackOff"}[2m]) == 1
           for: 5m
           labels:
             severity: critical
@@ -96,11 +104,23 @@ spec:
         # routinely for a few seconds to minutes during a genuine sync, per step 9.3/9.4's own
         # history) - the 15m `for:` is deliberately longer than any normal sync this project
         # has ever taken, not just a round number.
+        #
+        # max by (name, namespace) + max_over_time(...[5m]): found live during a real ~20+ minute
+        # stuck deployment that this never fired despite genuinely being unhealthy the whole
+        # time. root cause: argocd_app_info's label set includes health_status/sync_status
+        # themselves, so every time the app flapped between Degraded/Progressing/OutOfSync/Synced
+        # the query matched a DIFFERENT series with a different label set - prometheus treats each
+        # distinct output label combination as a separate alert instance, so for: kept resetting
+        # to zero instead of accumulating. aggregating away the volatile labels down to just
+        # name+namespace makes it one continuous instance regardless of which specific condition
+        # matched at each evaluation; max_over_time smooths brief flicker between them.
         - alert: ArgoApplicationUnhealthy
           expr: |
-            argocd_app_info{health_status="Degraded"} == 1
-            or
-            argocd_app_info{sync_status="OutOfSync"} == 1
+            (
+              max by (name, namespace) (max_over_time(argocd_app_info{health_status="Degraded"}[5m]))
+              or
+              max by (name, namespace) (max_over_time(argocd_app_info{sync_status="OutOfSync"}[5m]))
+            ) == 1
           for: 15m
           labels:
             severity: warning
