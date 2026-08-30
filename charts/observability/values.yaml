@@ -95,6 +95,15 @@ kube-prometheus-stack:
   prometheus:
     prometheusSpec:
       retention: 15d
+      # prometheus-cloudwatch-exporter embeds cloudwatch's own datapoint timestamp in each
+      # sample rather than using scrape time - found live that this is ~16 minutes old
+      # (RDS's own publishing lag plus the exporter's 5-minute statistics period), and
+      # Prometheus's default out-of-order window is 0s, silently dropping every sample from
+      # this exporter at ingestion despite the scrape itself succeeding (target stayed "up"
+      # the whole time - this cost real debugging effort to trace past that). 30m gives
+      # comfortable margin over the observed ~16m, not just enough to cover it exactly.
+      tsdb:
+        outOfOrderTimeWindow: 30m
       resources:
         requests:
           cpu: 100m
