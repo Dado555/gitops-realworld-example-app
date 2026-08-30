@@ -2,5 +2,8 @@ dependencies:
 - name: kube-prometheus-stack
   repository: https://prometheus-community.github.io/helm-charts
   version: 88.6.1
-digest: sha256:88d3e8276c8dd3d5fba02b0d6b5eff67985ed8fd52875e6752524e609775e5e7
-generated: "2026-08-30T17:53:36.1626832+02:00"
+- name: prometheus-cloudwatch-exporter
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 0.28.1
+digest: sha256:6c5d56038bb44493d3f7724202618aab443c134b50a32e74527186997803cda4
+generated: "2026-08-30T20:48:14.640329+02:00"
