@@ -7,3 +7,7 @@ dependencies:
   - name: kube-prometheus-stack
     version: 88.6.1
     repository: https://prometheus-community.github.io/helm-charts
+  # step 9.6: bridges rds cloudwatch metrics into prometheus's own alerting engine
+  - name: prometheus-cloudwatch-exporter
+    version: 0.28.1
+    repository: https://prometheus-community.github.io/helm-charts
