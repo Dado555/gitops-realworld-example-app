@@ -1,0 +1,40 @@
+# values here are namespaced under the dependency name (kube-prometheus-stack) per
+# Helm's standard subchart convention - schema verified against the real 88.6.1
+# values.yaml, not assumed from memory.
+kube-prometheus-stack:
+  alertmanager:
+    enabled: true
+
+  prometheus:
+    prometheusSpec:
+      retention: 15d
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          cpu: 500m
+          memory: 1Gi
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3-backup
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 20Gi
+
+  grafana:
+    persistence:
+      enabled: true
+      type: sts
+      storageClassName: gp3-backup
+      accessModes:
+        - ReadWriteOnce
+      size: 10Gi
+      finalizers:
+        - kubernetes.io/pvc-protection
+    # eso-synced dev/observability/grafana, keys admin-user/admin-password match this
+    # chart's own userKey/passwordKey defaults exactly - never set adminPassword here.
+    admin:
+      existingSecret: grafana-admin

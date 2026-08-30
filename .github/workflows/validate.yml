@@ -16,12 +16,25 @@ jobs:
         include:
           - chart: realworld-backend
             values: envs/dev/backend-values.yaml
+            kubeconform_args: ""
           - chart: realworld-frontend
             values: envs/dev/frontend-values.yaml
+            kubeconform_args: ""
           - chart: realworld-backend
             values: envs/prod/backend-values.yaml
+            kubeconform_args: ""
           - chart: realworld-frontend
             values: envs/prod/frontend-values.yaml
+            kubeconform_args: ""
+          # points at the chart's own values.yaml (a harmless no-op override) rather than
+          # leaving values blank - keeps this step's -f flag unconditional, no per-env
+          # override exists (or is needed) for this chart, same in dev and prod-on-dev-infra.
+          # -ignore-missing-schemas: kubeconform has no schema for prometheus-operator's CRDs
+          # (Prometheus/Alertmanager/ServiceMonitor/etc.) - verified locally this only skips
+          # those 50 custom-kind resources, the other 73 built-in-kind resources still validate.
+          - chart: observability
+            values: charts/observability/values.yaml
+            kubeconform_args: "-ignore-missing-schemas"
     steps:
       - name: checkout
         uses: actions/checkout@v7.0.1
@@ -42,17 +55,19 @@ jobs:
       - name: kubeconform
         run: |
           docker run --rm -i ghcr.io/yannh/kubeconform:v0.8.0 \
-            -strict -summary -kubernetes-version 1.36.0 < rendered.yaml
+            -strict -summary -kubernetes-version 1.36.0 ${{ matrix.kubeconform_args }} < rendered.yaml
 
-      # LOW findings here are permanent/non-actionable for this chart set
-      # (backend's uid 999 must match the image's real spring:spring user;
-      # frontend's implicit uid 101 comes from the nginx-unprivileged base;
-      # the "default namespace" finding is a helm-template rendering artifact -
-      # Argo sets the real namespace via the Application's destination field) -
-      # gate on MEDIUM+ only, not a blanket ignore-list for things that can't change
+      # LOW findings for backend/frontend are permanent/non-actionable (backend's uid 999 must
+      # match the image's real spring:spring user; frontend's implicit uid 101 comes from the
+      # nginx-unprivileged base; the "default namespace" finding is a helm-template rendering
+      # artifact - Argo sets the real namespace via the Application's destination field) - gate
+      # on MEDIUM+ only for those, not a blanket ignore-list for things that can't change.
+      # observability's CRITICAL/HIGH findings are different in kind (kube-prometheus-stack's
+      # own RBAC/hostPath/registry choices, not a severity-filter-appropriate style nitpick) -
+      # tracked explicitly in .trivyignore instead, matching the infra repo's step 8.3 convention.
       # ghcr, not docker hub - avoids docker hub's anonymous-pull rate limit,
       # which github-hosted runners share across a huge pool of unrelated jobs
       - name: trivy config
         run: |
           docker run --rm -v "$PWD:/render" ghcr.io/aquasecurity/trivy:0.74.0 config \
-            --severity MEDIUM,HIGH,CRITICAL --exit-code 1 /render/rendered.yaml
+            --severity MEDIUM,HIGH,CRITICAL --exit-code 1 --ignorefile /render/.trivyignore /render/rendered.yaml
