@@ -67,12 +67,20 @@ spec:
               value: "jdbc:postgresql://drill-nonexistent-host:5432/realworld"
             {{- end }}
             {{- if .Values.drillPrivilegedPort }}
-            # step 9.7 alert-drill only: binds embedded tomcat to port 80. runAsUser 999 (non-root,
-            # see securityContext above) can't bind <1024, so this throws BindException during
-            # context refresh and exits the jvm immediately - a genuine, fast CrashLoopBackOff,
-            # unlike drillBadDbUrl above.
+            # step 9.7 alert-drill only: tried binding embedded tomcat to port 80 expecting a
+            # BindException (runAsUser 999, non-root). found live this node's kernel allows
+            # unprivileged binding below 1024 (net.ipv4.ip_unprivileged_port_start=0, common on
+            # newer AL2023/container-optimized kernels) - both pods came up healthy. left as a
+            # documented dead end; use drillBadServerPort below instead.
             - name: SERVER_PORT
               value: "80"
+            {{- end }}
+            {{- if .Values.drillBadServerPort }}
+            # step 9.7 alert-drill only: non-numeric SERVER_PORT fails spring boot's own config
+            # property binding (int coercion) during context refresh, well before any socket is
+            # opened - independent of node/kernel networking config, unlike drillPrivilegedPort.
+            - name: SERVER_PORT
+              value: "not-a-port"
             {{- end }}
           startupProbe:
             httpGet:
