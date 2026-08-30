@@ -5,6 +5,16 @@ kube-prometheus-stack:
   alertmanager:
     enabled: true
 
+  # the observability namespace enforces the "restricted" PodSecurity standard (step 5.5) -
+  # node-exporter fundamentally cannot run under it (hostNetwork/hostPID/hostPath are how it
+  # reads host-level metrics, not a misconfiguration - same reasoning as the .trivyignore
+  # entries). moving it to kube-system (unrestricted, and where it conceptually belongs
+  # alongside the other host-level daemonsets) avoids relaxing observability's own posture
+  # for the other components that genuinely don't need it. a well-established, chart-supported
+  # pattern, not a workaround - ServiceMonitor discovery follows namespaceOverride automatically.
+  prometheus-node-exporter:
+    namespaceOverride: kube-system
+
   prometheus:
     prometheusSpec:
       retention: 15d
@@ -38,3 +48,9 @@ kube-prometheus-stack:
     # chart's own userKey/passwordKey defaults exactly - never set adminPassword here.
     admin:
       existingSecret: grafana-admin
+    # same restricted-PodSecurity conflict as node-exporter, different fix: this init container
+    # only exists to chown a mounted volume for older grafana images that ran as root by
+    # default - this chart's grafana image already runs as its own non-root uid, so the step
+    # is both unnecessary and the one thing in this release actually needing root.
+    initChownData:
+      enabled: false
