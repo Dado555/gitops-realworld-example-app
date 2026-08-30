@@ -19,10 +19,6 @@ spec:
           tag: "779708c"
           digest: "sha256:66ed376636e9e0cbc2fb646692318a2b4b8c2a19a381820ea0fa8825fc37e9aa"
         replicaCount: 2
-        # step 9.7 alert drill - temporary, reverted once PodCrashLooping is confirmed firing,
-        # notifying, and resolving. two prior attempts (drillBadDbUrl, drillPrivilegedPort)
-        # didn't actually crash the jvm - see chart comments. drillBadServerPort should.
-        drillBadServerPort: true
   destination:
     server: https://kubernetes.default.svc
     namespace: app-dev
