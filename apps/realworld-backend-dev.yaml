@@ -19,11 +19,6 @@ spec:
           tag: "779708c"
           digest: "sha256:66ed376636e9e0cbc2fb646692318a2b4b8c2a19a381820ea0fa8825fc37e9aa"
         replicaCount: 2
-        # step 9.7 alert drill, take 2 - now testing the fixed alert exprs (max_over_time /
-        # max by) after confirming both never fired on the first attempt. deployment scaled to
-        # 1 replica beforehand to keep the presync migrate job clear of the quota ceiling this
-        # time (see the deadlock from take 1).
-        drillBadServerPort: true
   destination:
     server: https://kubernetes.default.svc
     namespace: app-dev
