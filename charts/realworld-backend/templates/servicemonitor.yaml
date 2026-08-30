@@ -1,0 +1,20 @@
+{{/* step 9.4: scrapes /actuator/prometheus on the management port. namespace-scoped by
+     ServiceMonitor's own default (matches only Services in this same namespace) - dev and
+     prod each get their own copy via their own Application, no cross-selection between them.
+     release: observability is required, not cosmetic - the Prometheus CR's own
+     serviceMonitorSelector only watches ServiceMonitors carrying this exact label. */}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "realworld-backend.fullname" . }}
+  labels:
+    {{- include "realworld-backend.labels" . | nindent 4 }}
+    release: observability
+spec:
+  selector:
+    matchLabels:
+      {{- include "realworld-backend.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: management
+      path: /actuator/prometheus
+      interval: 30s

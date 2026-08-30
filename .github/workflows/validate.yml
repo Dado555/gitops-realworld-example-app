@@ -14,15 +14,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # -ignore-missing-schemas on the backend entries since step 9.4: kubeconform has no
+          # schema for the new ServiceMonitor (a prometheus-operator CRD, same as observability
+          # below) - verified locally this only skips that one resource, everything else in
+          # the chart (Deployment/Service/HPA/PDB/NetworkPolicy/etc.) still validates normally.
           - chart: realworld-backend
             values: envs/dev/backend-values.yaml
-            kubeconform_args: ""
+            kubeconform_args: "-ignore-missing-schemas"
           - chart: realworld-frontend
             values: envs/dev/frontend-values.yaml
             kubeconform_args: ""
           - chart: realworld-backend
             values: envs/prod/backend-values.yaml
-            kubeconform_args: ""
+            kubeconform_args: "-ignore-missing-schemas"
           - chart: realworld-frontend
             values: envs/prod/frontend-values.yaml
             kubeconform_args: ""
