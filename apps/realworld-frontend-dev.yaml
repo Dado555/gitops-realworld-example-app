@@ -27,8 +27,18 @@ spec:
       prune: true
       selfHeal: true
   # step 7.6: hpa owns replicas once live, don't let selfHeal fight it back to the helm-declared value
+  #
+  # step 9.3: also ignore the hpa's own minReplicas - discovered live during a node-drain that
+  # needed a temporary manual minReplicas bump so a spare pod could satisfy the pdb. without this,
+  # root-app's own selfHeal (this Application is itself one of the manifests it manages) reverts
+  # the live Application object's syncPolicy edits, AND this app's selfHeal reverts the hpa object
+  # itself, on the same reconcile pass - a manual kubectl patch never survives long enough to help.
   ignoreDifferences:
     - group: apps
       kind: Deployment
       jsonPointers:
         - /spec/replicas
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /spec/minReplicas

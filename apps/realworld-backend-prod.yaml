@@ -32,8 +32,16 @@ spec:
       prune: true
       selfHeal: true
   # step 7.6: hpa owns replicas once live, don't let selfHeal fight it back to the helm-declared value
+  #
+  # step 9.3: also ignore the hpa's own minReplicas - see the matching comment on
+  # realworld-frontend-dev.yaml for why (root-app's own selfHeal reverts a live edit to this
+  # Application's spec before this app's selfHeal:false would ever take effect).
   ignoreDifferences:
     - group: apps
       kind: Deployment
       jsonPointers:
         - /spec/replicas
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /spec/minReplicas
