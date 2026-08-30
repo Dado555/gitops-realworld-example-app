@@ -1,0 +1,193 @@
+{
+  "title": "Database",
+  "uid": "realworld-database",
+  "tags": ["realworld", "database"],
+  "timezone": "utc",
+  "editable": false,
+  "schemaVersion": 39,
+  "time": { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Connection Pool Usage (Hikari, app-side)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "hikaricp_connections_active{application=\"realworld-backend\"}",
+          "legendFormat": "active - {{pool}}"
+        },
+        {
+          "refId": "B",
+          "expr": "hikaricp_connections_idle{application=\"realworld-backend\"}",
+          "legendFormat": "idle - {{pool}}"
+        },
+        {
+          "refId": "C",
+          "expr": "hikaricp_connections_max{application=\"realworld-backend\"}",
+          "legendFormat": "max - {{pool}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "min": 0 }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Pool Utilization",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(hikaricp_connections_active{application=\"realworld-backend\"}) / sum(hikaricp_connections_max{application=\"realworld-backend\"})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.7 },
+              { "color": "red", "value": 0.9 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Connection Acquisition Time",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(hikaricp_connections_creation_seconds_sum{application=\"realworld-backend\"}[5m]) / rate(hikaricp_connections_creation_seconds_count{application=\"realworld-backend\"}[5m])",
+          "legendFormat": "avg creation time"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "RDS CPU Utilization",
+      "gridPos": { "x": 0, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "targets": [
+        {
+          "refId": "A",
+          "namespace": "AWS/RDS",
+          "metricName": "CPUUtilization",
+          "dimensions": { "DBInstanceIdentifier": "realworld-aws-dev-db" },
+          "statistic": "Average",
+          "region": "us-east-1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "percent", "min": 0, "max": 100 }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "RDS Free Storage Space",
+      "gridPos": { "x": 8, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "targets": [
+        {
+          "refId": "A",
+          "namespace": "AWS/RDS",
+          "metricName": "FreeStorageSpace",
+          "dimensions": { "DBInstanceIdentifier": "realworld-aws-dev-db" },
+          "statistic": "Average",
+          "region": "us-east-1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "min": 0 }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "RDS Database Connections",
+      "description": "RDS-side view of connection count - compare against the Hikari pool-side panel above; a mismatch usually means another client is also connecting.",
+      "gridPos": { "x": 16, "y": 8, "w": 8, "h": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "targets": [
+        {
+          "refId": "A",
+          "namespace": "AWS/RDS",
+          "metricName": "DatabaseConnections",
+          "dimensions": { "DBInstanceIdentifier": "realworld-aws-dev-db" },
+          "statistic": "Average",
+          "region": "us-east-1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "min": 0 }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "RDS Freeable Memory",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "targets": [
+        {
+          "refId": "A",
+          "namespace": "AWS/RDS",
+          "metricName": "FreeableMemory",
+          "dimensions": { "DBInstanceIdentifier": "realworld-aws-dev-db" },
+          "statistic": "Average",
+          "region": "us-east-1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "min": 0 }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "RDS Read/Write Latency",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "cloudwatch" },
+      "targets": [
+        {
+          "refId": "A",
+          "namespace": "AWS/RDS",
+          "metricName": "ReadLatency",
+          "dimensions": { "DBInstanceIdentifier": "realworld-aws-dev-db" },
+          "statistic": "Average",
+          "region": "us-east-1"
+        },
+        {
+          "refId": "B",
+          "namespace": "AWS/RDS",
+          "metricName": "WriteLatency",
+          "dimensions": { "DBInstanceIdentifier": "realworld-aws-dev-db" },
+          "statistic": "Average",
+          "region": "us-east-1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "s" }
+      }
+    }
+  ]
+}

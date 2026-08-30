@@ -1,0 +1,18 @@
+{{/* step 9.5: one ConfigMap per file under dashboards/ - drop a new .json there and it's
+     picked up automatically, no template changes needed. same grafana_dashboard=1 sidecar
+     mechanism kube-prometheus-stack's own ~29 default dashboards already use (confirmed live
+     in step 9.3) - dashboards as code, not clicked into existence. */}}
+{{- range $path, $_ := .Files.Glob "dashboards/*.json" }}
+{{- $name := regexReplaceAll "dashboards/(.*)\\.json" $path "${1}" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-{{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+data:
+  {{ $name }}.json: |-
+{{ $.Files.Get $path | indent 4 }}
+---
+{{- end }}
