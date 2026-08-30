@@ -1,7 +1,7 @@
 # dev overrides - image tag/digest updated automatically by ci on every push (step 8.5)
 image:
   repository: "262786914511.dkr.ecr.us-east-1.amazonaws.com/realworld-backend"
-  tag: "2f05824"
-  digest: "sha256:83618a23524315ad179a324b71f8e896ddf30713848ca0f8d0b9257b2d01a135"
+  tag: "867feaf"
+  digest: "sha256:49d5872e20fc171521bc03c2ee3b3680b6c5774a06cb371d2db811d90feda44a"
 
 replicaCount: 2
