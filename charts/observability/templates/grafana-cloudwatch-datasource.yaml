@@ -1,0 +1,24 @@
+{{/* step 9.5: rds metrics for the database dashboard. sidecar-provisioned (grafana_datasource
+     label), same mechanism kube-prometheus-stack's own Prometheus/Alertmanager datasources
+     use - additive, doesn't touch that existing ConfigMap. authType: default uses the pod's
+     own IAM role via the AWS SDK's standard credential chain (Pod Identity, see
+     modules/eks/grafana_cloudwatch.tf) - no static keys, matching every other AWS-calling
+     workload in this cluster. */}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-cloudwatch-datasource
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_datasource: "1"
+data:
+  cloudwatch-datasource.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: CloudWatch
+        type: cloudwatch
+        uid: cloudwatch
+        access: proxy
+        jsonData:
+          authType: default
+          defaultRegion: us-east-1
