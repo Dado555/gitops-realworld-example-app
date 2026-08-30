@@ -70,11 +70,18 @@ spec:
         # real, not round numbers: 20% of the 20GiB allocated (no storage autoscaling
         # configured - this does not self-heal), ~80% of the ~112 max_connections this
         # db.t4g.micro instance's memory computes to (LEAST(DBInstanceClassMemory/9531392, 5000)).
+        #
+        # wrapped in last_over_time(...[20m]): this exporter embeds CloudWatch's own datapoint
+        # timestamp (not scrape time), which runs ~15-16m behind wall-clock (RDS's own publishing
+        # lag plus the exporter's 5m statistics period) - found live that a bare instant selector
+        # never matches, because it exceeds Prometheus's default 5m query.lookback-delta. 20m
+        # gives comfortable margin over the observed lag without touching the global flag (which
+        # would loosen staleness handling for every other alert/query too).
         - alert: RDSStorageOrConnectionsNearLimit
           expr: |
-            aws_rds_free_storage_space_average{dbinstance_identifier="realworld-aws-dev-db"} < 4.295e+9
+            last_over_time(aws_rds_free_storage_space_average{dbinstance_identifier="realworld-aws-dev-db"}[20m]) < 4.295e+9
             or
-            aws_rds_database_connections_average{dbinstance_identifier="realworld-aws-dev-db"} > 90
+            last_over_time(aws_rds_database_connections_average{dbinstance_identifier="realworld-aws-dev-db"}[20m]) > 90
           for: 10m
           labels:
             severity: warning
